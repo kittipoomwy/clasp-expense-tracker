@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top" />
+    <meta charset="utf-8" />
+    <title>Access Denied - Expense Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <?!= include('client/unauthorized/styles'); ?>
+  </head>
+  <body>
+    <div class="container">
+      <div class="icon">=</div>
+      <h1>Access Denied</h1>
+      <p class="message">
+        Sorry, you don't have permission to access this application.
+      </p>
+      <p class="email-label">Your email address:</p>
+      <div class="email" id="userEmail">Loading...</div>
+      <div class="actions">
+        <button class="btn btn-logout" onclick="handleLogout()">
+          🔄 Switch Account
+        </button>
+      </div>
+      <p class="footer-text">
+        Please contact the administrator if you believe this is an error.
+      </p>
+    </div>
+    <?!= include('client/unauthorized/script'); ?>
+  </body>
+</html>

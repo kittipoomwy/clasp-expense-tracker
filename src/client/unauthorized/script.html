@@ -1,0 +1,23 @@
+<script>
+  // Load user email on page load
+  document.addEventListener("DOMContentLoaded", function () {
+    google.script.run
+      .withSuccessHandler(function (email) {
+        document.getElementById("userEmail").textContent =
+          email || "Unable to retrieve email";
+      })
+      .withFailureHandler(function (error) {
+        console.error("Error loading email:", error);
+        document.getElementById("userEmail").textContent =
+          "Error loading email";
+      })
+      .getUserEmail();
+  });
+
+  // Handle logout/account switch
+  function handleLogout() {
+    // Clear Google session and redirect to account selector
+    const logoutUrl = "https://accounts.google.com/Logout?continue=https://appengine.google.com/_ah/logout?continue=" + encodeURIComponent(window.location.href);
+    window.top.location.href = logoutUrl;
+  }
+</script>

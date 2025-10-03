@@ -1,0 +1,224 @@
+<script>
+  // ===== CONFIGURATION =====
+  // Update this URL with your Google Form link
+  const GOOGLE_FORM_URL =
+    "https://docs.google.com/forms/d/e/1FAIpQLSc-EXAMPLE-FORM-ID/viewform";
+  // =========================
+
+  let selectedUser = null;
+
+  // Initialize on page load
+  window.onload = function () {
+    loadUserEmail();
+    loadUsers();
+    loadExpenses();
+    loadMonthlySummary();
+    loadAllTimeSummary();
+  };
+
+  // Load current user email
+  function loadUserEmail() {
+    google.script.run
+      .withSuccessHandler(function (email) {
+        document.getElementById("userEmail").textContent = email || "Guest";
+      })
+      .withFailureHandler(function (error) {
+        console.error("Error loading email:", error);
+        document.getElementById("userEmail").textContent = "Guest";
+      })
+      .getUserEmail();
+  }
+
+  // Load users and populate dropdown
+  function loadUsers() {
+    google.script.run
+      .withSuccessHandler(displayUsers)
+      .withFailureHandler((error) =>
+        console.error("Error loading users:", error)
+      )
+      .getAllUsers();
+  }
+
+  // Display users in dropdown
+  function displayUsers(users) {
+    const userSelect = document.getElementById("userSelect");
+    userSelect.innerHTML = '<option value="">All Users</option>';
+
+    users.forEach((user) => {
+      const option = document.createElement("option");
+      option.value = user;
+      option.textContent = user;
+      userSelect.appendChild(option);
+    });
+
+    // Add change event listener
+    userSelect.addEventListener("change", function () {
+      selectedUser = this.value || null;
+      refreshData();
+    });
+  }
+
+  // Refresh all data based on selected user
+  function refreshData() {
+    loadExpenses();
+    loadMonthlySummary();
+    loadAllTimeSummary();
+  }
+
+  // Load recent expenses
+  function loadExpenses() {
+    showLoading("expenses");
+
+    google.script.run
+      .withSuccessHandler(displayExpenses)
+      .withFailureHandler((error) => handleError("expenses", error))
+      .getRecentExpenses();
+  }
+
+  // Display expenses
+  function displayExpenses(recentExpenses) {
+    const container = document.querySelector(".expenses-container");
+    const loadingDiv = container.querySelector(".loading");
+    const expensesDiv = container.querySelector(".expenses");
+    const noDataDiv = container.querySelector(".no-data");
+
+    loadingDiv.style.display = "none";
+
+    if (!recentExpenses || recentExpenses.length === 0) {
+      noDataDiv.style.display = "block";
+      expensesDiv.style.display = "none";
+      return;
+    }
+
+    noDataDiv.style.display = "none";
+    expensesDiv.style.display = "flex";
+
+    let html = "";
+    recentExpenses.forEach((expense) => {
+      const date = expense.Date
+        ? new Date(expense.Date).toLocaleDateString("th-TH")
+        : "";
+      html += `
+        <div class="expense-item">
+          <div class="expense-info">
+            <div class="expense-name">${expense.Item || "No description"}</div>
+            <div class="expense-date">${date} - ${
+        expense["Who paid?"] || ""
+      }</div>
+          </div>
+          <div class="expense-amount">฿${parseFloat(
+            expense.Amount || 0
+          ).toFixed(2)}</div>
+        </div>
+      `;
+    });
+
+    expensesDiv.innerHTML = html;
+  }
+
+  // Load monthly summary
+  function loadMonthlySummary() {
+    const summaryCards = document.querySelectorAll(".row:first-child .card")[0];
+    showSummaryLoading(summaryCards);
+
+    google.script.run
+      .withSuccessHandler((data) => displaySummary(data, summaryCards))
+      .withFailureHandler((error) => handleSummaryError(summaryCards, error))
+      .getMonthlySummary(selectedUser);
+  }
+
+  // Load all-time summary
+  function loadAllTimeSummary() {
+    const summaryCards = document.querySelectorAll(".row:first-child .card")[1];
+    showSummaryLoading(summaryCards);
+
+    google.script.run
+      .withSuccessHandler((data) => displaySummary(data, summaryCards))
+      .withFailureHandler((error) => handleSummaryError(summaryCards, error))
+      .getAllTimeSummary(selectedUser);
+  }
+
+  // Display summary data
+  function displaySummary(data, container) {
+    const loadingDiv = container.querySelector(".loading");
+    const summaryDiv = container.querySelector(".summary");
+
+    loadingDiv.style.display = "none";
+    summaryDiv.style.display = "flex";
+
+    const summaryCards = summaryDiv.querySelectorAll(".summary-card");
+    summaryCards[0].querySelector(
+      ".summary-value"
+    ).textContent = `฿${parseFloat(data.totalSpending || 0).toFixed(2)}`;
+    summaryCards[1].querySelector(".summary-value").textContent =
+      data.transactions || 0;
+
+    // Balance Owed - positive means others owe them, negative means they owe others
+    const balance = parseFloat(data.balanceOwed || 0);
+    const balanceText =
+      balance >= 0
+        ? `+฿${balance.toFixed(2)}`
+        : `-฿${Math.abs(balance).toFixed(2)}`;
+    const balanceColor = balance >= 0 ? "green" : "red";
+
+    const balanceElement = summaryCards[2].querySelector(".summary-value");
+    balanceElement.textContent = balanceText;
+    balanceElement.style.color = balanceColor;
+  }
+
+  // Show loading state for specific section
+  function showLoading(section) {
+    if (section === "expenses") {
+      const container = document.querySelector(".expenses-container");
+      container.querySelector(".loading").style.display = "block";
+      container.querySelector(".expenses").style.display = "none";
+      container.querySelector(".no-data").style.display = "none";
+    }
+  }
+
+  // Show summary loading
+  function showSummaryLoading(container) {
+    container.querySelector(".loading").style.display = "block";
+    container.querySelector(".summary").style.display = "none";
+  }
+
+  // Handle errors
+  function handleError(section, error) {
+    console.error("Error loading " + section + ":", error);
+
+    if (section === "expenses") {
+      const container = document.querySelector(".expenses-container");
+      container.querySelector(".loading").style.display = "none";
+      container.querySelector(".no-data").style.display = "block";
+      container.querySelector(".no-data .text-muted").textContent =
+        "Error loading expenses: " + error.message;
+    }
+  }
+
+  // Handle summary errors
+  function handleSummaryError(container, error) {
+    console.error("Error loading summary:", error);
+    container.querySelector(".loading").style.display = "none";
+    container.querySelector(".summary").style.display = "block";
+  }
+
+  // Add expense button handler
+  document.addEventListener("DOMContentLoaded", function () {
+    const addBtn = document.querySelector(".btn-primary");
+    if (addBtn) {
+      addBtn.addEventListener("click", function () {
+        // Open Google Form in new tab
+        window.open(GOOGLE_FORM_URL, "_blank");
+      });
+    }
+
+    const testBtn = document.querySelector(".test-btn");
+    if (testBtn) {
+      testBtn.addEventListener("click", function () {
+        google.script.run
+          .withSuccessHandler((data) => console.log("Test result:", data))
+          .getRecentExpenses();
+      });
+    }
+  });
+</script>

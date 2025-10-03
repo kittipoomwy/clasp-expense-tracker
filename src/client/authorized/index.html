@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top" />
+    <meta charset="utf-8" />
+    <title>Expense Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <?!= include('client/authorized/styles'); ?>
+  </head>
+  <body>
+    <div class="main-container">
+      <header>
+        <div class="header-container">
+          <div class="header-brand">
+            <div class="brand-content">
+              <h1>Expense Tracker</h1>
+              <p class="subtitle">Track your expenses from anywhere</p>
+            </div>
+          </div>
+          <div class="header-actions">
+            <div class="user-info">
+              <span class="user-email" id="userEmail">Loading...</span>
+            </div>
+          </div>
+        </div>
+        <div class="user-selector">
+          <label for="userSelect">View expenses for:</label>
+          <select id="userSelect" class="user-select">
+            <option value="">Loading users...</option>
+          </select>
+        </div>
+      </header>
+
+      <main>
+        <!-- First Row -->
+        <div class="row">
+          <!-- Monthly Summary -->
+          <section class="card">
+            <h2>This Month</h2>
+            <div class="summary-container">
+              <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading summary...</p>
+              </div>
+              <div class="summary" style="display: none">
+                <div class="summary-card">
+                  <h3>Total Spending</h3>
+                  <p class="summary-value">$0.00</p>
+                </div>
+                <div class="summary-card">
+                  <h3>Transactions</h3>
+                  <p class="summary-value">0</p>
+                </div>
+                <div class="summary-card">
+                  <h3>Balance Owed</h3>
+                  <p class="summary-value">$0.00</p>
+                </div>
+              </div>
+            </div>
+            <p class="card-footer">Summary of your expenses for this month</p>
+          </section>
+
+          <!-- All-Time Summary -->
+          <section class="card">
+            <h2>All Time</h2>
+            <div class="summary-container">
+              <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading summary...</p>
+              </div>
+              <div class="summary" style="display: none">
+                <div class="summary-card">
+                  <h3>Total Spending</h3>
+                  <p class="summary-value">$0.00</p>
+                </div>
+                <div class="summary-card">
+                  <h3>Transactions</h3>
+                  <p class="summary-value">0</p>
+                </div>
+                <div class="summary-card">
+                  <h3>Balance Owed</h3>
+                  <p class="summary-value">$0.00</p>
+                </div>
+              </div>
+            </div>
+            <p class="card-footer">Summary of all your expenses</p>
+          </section>
+        </div>
+        <div class="row">
+          <!-- Recent Expenses -->
+          <section class="card expenses-card">
+            <div class="card-header">
+              <h2>Recent Expenses</h2>
+              <button class="btn btn-primary">+ Add Expense</button>
+            </div>
+            <div class="expenses-container">
+              <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading expenses...</p>
+              </div>
+              <div class="expenses" style="display: none">
+                <!-- Expenses will be loaded here -->
+              </div>
+              <div class="no-data">
+                <p class="text-muted">No expenses found</p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+    <?!= include('client/authorized/script'); ?>
+  </body>
+</html>
