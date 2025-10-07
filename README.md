@@ -225,3 +225,7 @@ For issues, questions, or suggestions:
 - Consult [CLAUDE.md](CLAUDE.md) for architecture
 
 ---
+
+## Screenshots
+
+![screenshot](screenshot.png)
